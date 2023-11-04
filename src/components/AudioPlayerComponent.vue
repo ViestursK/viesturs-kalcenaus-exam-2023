@@ -11,13 +11,13 @@ export default {
     components: { IconPlay, IconPause, IconNext, IconPrev },
     data() {
         return {
-            time          : undefined,
-            btn_prev      : undefined,
-            btn_next      : undefined,
-            is_playing    : false,
+            time: undefined,
+            btn_prev: undefined,
+            btn_next: undefined,
+            is_playing: false,
             audio_playback: undefined,
-            audio_time    : 0,
-            audio_length  : 0
+            audio_time: 0,
+            audio_length: 0
         };
     },
     unmounted() {
@@ -25,18 +25,18 @@ export default {
     },
     methods: {
         ...mapActions(usePlayerStore, {
-            setNowPlaying  : "setNowPlaying",
+            setNowPlaying: "setNowPlaying",
             resetNowPlaying: "resetNowPlaying",
         }),
         playSong(preview) {
-            this.is_playing      = true;
+            this.is_playing = true;
             this.$refs.audio.src = preview;
 
             this.$refs.audio.play();
 
             // Start interval
             this.audio_playback = setInterval(() => {
-                this.audio_time   = Math.round(this.$refs.audio.currentTime);
+                this.audio_time = Math.round(this.$refs.audio.currentTime);
                 this.audio_length = Math.round(this.$refs.audio.duration);
 
                 this.$refs.time.style.width = (this.audio_time * 100) / this.audio_length + '%';
@@ -55,6 +55,10 @@ export default {
                 }
             }, 10)
         },
+        setVolume(volume) {
+            this.volume = volume;
+            this.$refs.audio.volume = volume;
+        },
         togglePlay() {
             clearInterval(this.audio_playback);
 
@@ -66,14 +70,14 @@ export default {
     },
     computed: {
         ...mapState(usePlayerStore, {
-            now_playing           : "getNowPlaying",
-            now_playing_song_id   : "getNowPlayingSongId",
-            song_preview          : "getNowPlayingSongPreview",
+            now_playing: "getNowPlaying",
+            now_playing_song_id: "getNowPlayingSongId",
+            song_preview: "getNowPlayingSongPreview",
             now_playing_song_image: "getNowPlayingSongImage",
-            now_playing_song_name : "getNowPlayingSongName",
-            now_playing_artists   : "getNowPlayingArtists",
-            next_song             : "getNextSong",
-            previous_song         : "getPreviousSong",
+            now_playing_song_name: "getNowPlayingSongName",
+            now_playing_artists: "getNowPlayingArtists",
+            next_song: "getNextSong",
+            previous_song: "getPreviousSong",
         }),
         get_playback_time() {
             return `0:${this.audio_time.toString().length === 1 ? `0${this.audio_time}` : this.audio_time}`
@@ -107,40 +111,27 @@ export default {
                 <div class="playback-controls">
 
                     <!-- PREVIOUS SONG BUTTON -->
-                    <button
-                        ref="prev"
-                        class="prev"
-                        @click="setNowPlaying(previous_song)"
-                        :disabled="!previous_song"
-                    >
-                        <IconPrev color="#FFF" width="60%"/>
+                    <button ref="prev" class="prev" @click="setNowPlaying(previous_song)" :disabled="!previous_song">
+                        <IconPrev color="#FFF" width="60%" />
                     </button>
 
                     <!-- PLAY/PAUSE BUTTON -->
-                    <button
-                        ref="play"
-                        class="play"
-                        @click="togglePlay()"
-                        :disabled="!now_playing_song_id"
-                    >
+                    <button ref="play" class="play" @click="togglePlay()" :disabled="!now_playing_song_id">
                         <IconPause v-if="is_playing" color="#FFF" width="60%" />
                         <IconPlay v-else color="#FFF" width="60%" />
                     </button>
 
                     <!-- NEXT SONG BUTTON -->
-                    <button
-                        ref="next"
-                        class="next"
-                        @click="setNowPlaying(next_song)"
-                        :disabled="!next_song"
-                    >
-                        <IconNext color="#FFF" width="60%"/>
+                    <button ref="next" class="next" @click="setNowPlaying(next_song)" :disabled="!next_song">
+                        <IconNext color="#FFF" width="60%" />
                     </button>
                 </div>
                 <div class="wrapper-audio-track">
 
                     <!-- PLAYBACK TIME -->
                     <p>{{ get_playback_time }}</p>
+
+
 
                     <!-- PROGRESS BAR -->
                     <div ref="audio-track" class="audio-track">
@@ -149,6 +140,12 @@ export default {
 
                     <!-- PLAYBACK TOTAL TIME -->
                     <p>{{ get_audio_length }}</p>
+
+                    <!-- VOLUME SLIDER -->
+                    <div class="volume-slider">
+                        <p>Volume </p>
+                        <input type="range" min="0" max="1" step="0.01" v-model="volume" @input="setVolume(volume)" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -157,103 +154,153 @@ export default {
 
 <style lang="scss" scoped>
 #audio-player {
-    height          : 100%;
-    width           : 100%;
-    padding         : 0 1rem;
-    border-top      : 1px solid var(--c-accent);
+    height: 100%;
+    width: 100%;
+    padding: 0 1rem;
+    border-top: 1px solid var(--c-accent);
     background-color: var(--c-dark);
+
     #controls {
-        display    : flex;
-        height     : 100%;
+        display: flex;
+        height: 100%;
         align-items: center;
-        position   : relative;
+        position: relative;
+
         .wrapper-song-info {
-            display      : flex;
-            align-items  : center;
-            width        : 30%;
-            position     : absolute;
+            display: flex;
+            align-items: center;
+            width: 30%;
+            position: absolute;
             padding-right: 1rem;
-            height       : inherit;
+            height: inherit;
+
             img {
-                height       : 70%;
-                width        : auto;
+                height: 70%;
+                width: auto;
                 border-radius: .25rem;
-                margin-right : 1rem;
-                z-index      : 0;
-                filter       : drop-shadow(10px 20px 30px rgba(144, 64, 241, .4));
+                margin-right: 1rem;
+                z-index: 0;
+                filter: drop-shadow(10px 20px 30px rgba(144, 64, 241, .4));
             }
+
             .song-info {
-                white-space  : nowrap;
-                overflow     : hidden;
+                white-space: nowrap;
+                overflow: hidden;
                 text-overflow: ellipsis;
-                margin-right : 2rem;
+                margin-right: 2rem;
+
                 .song-title {
-                    font-weight : 800;
-                    white-space : nowrap;
-                    overflow     : hidden;
+                    font-weight: 800;
+                    white-space: nowrap;
+                    overflow: hidden;
                     text-overflow: ellipsis;
                 }
+
                 .song-artists {
-                    opacity      : .8;
-                    white-space  : nowrap;
-                    overflow     : hidden;
+                    opacity: .8;
+                    white-space: nowrap;
+                    overflow: hidden;
                     text-overflow: ellipsis;
                 }
             }
         }
+
         .wrapper-playback-controls {
-            width : 40%;
+            width: 40%;
             margin: 0 30% 0 auto;
+
             .playback-controls {
-                display        : flex;
-                width          : 100%;
+                display: flex;
+                width: 100%;
                 justify-content: center;
-                margin-bottom  : .5rem;
+                margin-bottom: .5rem;
             }
+
             .wrapper-audio-track {
-                display    : flex;
+                display: flex;
                 align-items: center;
+
                 p {
-                    font-size     : .8rem;
-                    line-height   : normal;
+                    font-size: .8rem;
+                    line-height: normal;
                     padding-bottom: .2rem;
-                    font-weight   : 600;
+                    font-weight: 600;
+
                     &:last-child {
                         opacity: .5;
                     }
                 }
+
                 .audio-track {
-                    width           : 100%;
-                    height          : 4px;
+                    width: 100%;
+                    height: 4px;
                     background-color: var(--c-secondary);
-                    border-radius   : 2rem;
-                    margin          : 0px .5rem;
+                    border-radius: 2rem;
+                    margin: 0px .5rem;
+
                     .time {
-                        width           : 0;
-                        height          : 4px;
+                        width: 0;
+                        height: 4px;
                         background-color: var(--c-white);
-                        border-radius   : 2rem;
-                        filter           : drop-shadow(0 0px 5px rgb(255 255 255 / 20%));
+                        border-radius: 2rem;
+                        filter: drop-shadow(0 0px 5px rgb(255 255 255 / 20%));
+                    }
+                }
+
+                .volume-slider {
+                    flex-grow: 1;
+                    display: flex;
+                    align-items: center;
+                    margin: 0 1rem;
+
+                    p {
+                        margin-right: 1rem;
+                    }
+
+                    input[type="range"] {
+                        width: 100%;
+                        height: 6px;
+                        -webkit-appearance: none;
+                        background: var(--c-secondary);
+                        border-radius: 3px;
+                        outline: none;
+                        opacity: 0.7;
+                        transition: opacity 0.2s;
+                    }
+
+                    input[type="range"]::-webkit-slider-thumb {
+                        -webkit-appearance: none;
+                        appearance: none;
+                        width: 15px;
+                        height: 15px;
+                        border-radius: 50%;
+                        background: var(--c-white);
+                        cursor: pointer;
                     }
                 }
             }
         }
-        .play, .next, .prev {
-            margin-right    : .5rem;
-            border-radius   : .35rem;
+
+        .play,
+        .next,
+        .prev {
+            margin-right: .5rem;
+            border-radius: .35rem;
             background-color: transparent;
-            height          : 36px;
-            width           : 36px;
-            display         : flex;
-            align-items     : center;
-            justify-content : center;
+            height: 36px;
+            width: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
             &[disabled] {
                 box-shadow: none;
-                opacity   : .4;
-                cursor    : default;
+                opacity: .4;
+                cursor: default;
             }
 
         }
+
         .play {
             background-color: var(--c-primary);
             filter: drop-shadow(0px 4px 10px rgba(144, 64, 241, .1));
